@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 
 const http = require("http");
+const fromidable = require("formidable");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
 
@@ -40,8 +41,41 @@ io.sockets.on("connection", function(socket) {
   });
 });
 
+app.get("/updata", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "formUpload.html"));
+});
+
+app.post("/updata", upload);
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log("server is listening on " + PORT);
 });
+
+//upload func
+
+function upload(req, res) {
+  const type = req.headers["content-type"] || "";
+
+  if (type.indexOf("multipart/form-data") !== 0) {
+    res.json({ error: "no form data provided " });
+  }
+
+  const form = new fromidable.IncomingForm({
+    uploadDir: path.join(__dirname, "files")
+  });
+
+  form.on("field", function(field, value) {
+    console.log(field);
+    console.log(value);
+  });
+  form.on("progress", function(bytesReceived, bytesExpected) {
+    var percent = Math.floor((bytesReceived / bytesExpected) * 100);
+    console.log(percent);
+  });
+  form.on("end", function() {
+    res.end("upload complete!");
+  });
+  form.parse(req);
+}
