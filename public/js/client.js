@@ -5,7 +5,7 @@ console.log(patt.test(name));
 if (patt.test(name)) {
   name = null;
 }
-var socket = io();
+var socket = io.connect("/");
 
 const nickname = name || "newUser" + Math.floor(Math.random() * 1000);
 
